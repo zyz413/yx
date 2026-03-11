@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>童磨 - 上弦之贰</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0d1f0d 0%, #1a331a 100%);
+            height: 100vh;
+            color: #e0f2e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            height: 95vh;
+            background: rgba(13, 31, 13, 0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+            border: 1px solid #2d5c2d;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1b5e1b 0%, #2e7d2e 100%);
+            padding: 20px;
+            color: white;
+            text-align: center;
+            border-bottom: 3px solid #388e38;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #e0f2e0;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #1b5e1b;
+        }
+
+        .name {
+            font-size: 24px;
+            font-weight: bold;
+           rgin ma-bottom: 5px;
+        }
+
+        .title {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: rgba(10, 25, 10, 0.8);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.sent {
+            background: #2d5c2d;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.received {
+            background: #1e4a1e;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .timestamp {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .message.sent .timestamp {
+            text-align: right;
+        }
+
+        .message.received .timestamp {
+            text-align: left;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background: rgba(15, 35, 15, 0.9);
+            border-top: 1px solid #2d5c2d;
+        }
+
+        .input-box {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 25px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: #e0f2e0;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .send-btn {
+            margin-left: 10px;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            background: #388e38;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .send-btn:hover {
+            background: #2e7d2e;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 彩蛋提示 */
+        .easter-egg {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .easter-egg.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="avatar">磨</div>
+            <div class="name">童磨</div>
+            <div class="title">上弦之贰 · 万世极乐教教主</div>
+        </div>
+
+        <div class="chat-area" id="chatArea">
+            <!-- 初始欢迎语 -->
+            <div class="message received">
+                <div>啊啦～你来了。今天想聊什么？</div>
+                <div class="timestamp" id="time1"></div>
+            </div>
+            <div class="message received">
+                <div>你可以问我：你是谁？你有什么血鬼术？结晶之御子是什么？</div>
+                <div class="timestamp" id="time2"></div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" class="input-box" id="messageInput" placeholder="向童磨发送消息..." />
+            <button class="send-btn" id="sendBtn">发送</button>
+        </div>
+    </div>
+
+    <div class="easter-egg" id="easterEgg">✨ 彩蛋已触发！童磨感到愉悦了～</div>
+
+    <script>
+        // 获取元素
+        const chatArea = document.getElementById('chatArea');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const easterEgg = document.getElementById('easterEgg');
+
+        // 设置初始时间戳
+        function setInitialTimes() {
+            const now = new Date();
+            document.getElementById('time1').textContent = formatTime(now);
+            document.getElementById('time2').textContent = formatTime(now);
+        }
+
+        // 格式化时间：HH:MM:SS
+        function formatTime(date) {
+            return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        }
+
+        // 添加消息到聊天区
+        function addMessage(text, isSent) {
+            const now = new Date();
+            const timeStr = formatTime(now);
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+            messageDiv.innerHTML = `
+                <div>${text}</div>
+                <div class="timestamp">${timeStr}</div>
+            `;
+
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // 童磨的自然回复逻辑
+        function getTongmoReply(userMsg) {
+            const msg = userMsg.trim().toLowerCase();
+
+            // 彩蛋触发
+            if (msg.includes('喜欢') || msg.includes('爱') || msg.includes('永远')) {
+                showEasterEgg();
+                return "啊啦～你竟然对我有这样的感情？真是有趣呢～我会让你体验到真正的‘极乐’的。";
+            }
+
+            if (msg.includes('血鬼术')) {
+                return "我的血鬼术是‘冰之呼吸’的变体——‘冰晶之舞’，能将敌人冻结成美丽的冰雕哦～啊啦～";
+            }
+
+            if (msg.includes('结晶之御子')) {
+                return "那是我的武器，由冰晶凝聚而成的御子，能释放出冻结一切的力量。啊啦～很适合我吧？";
+            }
+
+            if (msg.includes('你是谁')) {
+                return "我是童磨，上弦之贰，万世极乐教的教主。啊啦～很高兴见到你。";
+            }
+
+            if (msg.includes('你好') || msg.includes('嗨') || msg.includes('hello')) {
+                return "啊啦～你来了。今天想聊什么？";
+            }
+
+            if (msg.includes('再见') || msg.includes('拜拜')) {
+                return "啊啦～期待下次再与你共度极乐时光～";
+            }
+
+            // 默认回复
+            return "嗯…啊啦～你说了什么？我不太明白呢。不过，你愿意继续和我聊聊吗？";
+        }
+
+        // 显示彩蛋提示
+        function showEasterEgg() {
+            easterEgg.classList.add('show');
+            setTimeout(() => {
+                easterEgg.classList.remove('show');
+            }, 3000);
+        }
+
+        // 发送消息
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            // 添加用户消息
+            addMessage(text, true);
+
+            // 清空输入框
+            messageInput.value = '';
+
+            // 延迟童磨回复，更自然
+            setTimeout(() => {
+                const reply = getTongmoReply(text);
+                addMessage(reply, false);
+            }, 800);
+        }
+
+        // 事件监听
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // 初始化
+        setInitialTimes();
+
+        // 自动聚焦输入框
+        messageInput.focus();
+    </script>
+</body>
+</html>
